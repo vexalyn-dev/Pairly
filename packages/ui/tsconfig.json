@@ -1,5 +1,5 @@
 {
-  "extends": "@pairly/config/typescript/react-library.json",
+  "extends": "../config/typescript/react-library.json",
   "compilerOptions": {
     "rootDir": "./src",
     "outDir": "./dist"

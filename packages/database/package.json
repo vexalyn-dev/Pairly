@@ -14,6 +14,7 @@
   "devDependencies": {
     "@pairly/config": "workspace:*",
     "@pairly/types": "workspace:*",
+    "@types/node": "^22.13.0",
     "typescript": "^5.7.0"
   }
 }

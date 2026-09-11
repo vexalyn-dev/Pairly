@@ -1,13 +1,18 @@
 {
-  "extends": "@pairly/config/typescript/nextjs.json",
+  "extends": "../../packages/config/typescript/nextjs.json",
   "compilerOptions": {
     "paths": {
       "@/*": ["./*"],
-      "@pairly/ui": ["../../packages/ui/src"],
-      "@pairly/types": ["../../packages/types/src"],
-      "@pairly/utils": ["../../packages/utils/src"],
-      "@pairly/validation": ["../../packages/validation/src"],
-      "@pairly/database": ["../../packages/database/src"]
+      "@pairly/ui": ["../../packages/ui/src/index.ts"],
+      "@pairly/ui/*": ["../../packages/ui/src/*"],
+      "@pairly/types": ["../../packages/types/src/index.ts"],
+      "@pairly/types/*": ["../../packages/types/src/*"],
+      "@pairly/utils": ["../../packages/utils/src/index.ts"],
+      "@pairly/utils/*": ["../../packages/utils/src/*"],
+      "@pairly/validation": ["../../packages/validation/src/index.ts"],
+      "@pairly/validation/*": ["../../packages/validation/src/*"],
+      "@pairly/database": ["../../packages/database/src/index.ts"],
+      "@pairly/database/*": ["../../packages/database/src/*"]
     }
   },
   "include": [

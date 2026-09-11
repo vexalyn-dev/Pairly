@@ -102,6 +102,9 @@ importers:
       '@pairly/types':
         specifier: workspace:*
         version: link:../types
+      '@types/node':
+        specifier: ^22.13.0
+        version: 22.20.2
       typescript:
         specifier: ^5.7.0
         version: 5.9.3

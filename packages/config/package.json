@@ -4,5 +4,8 @@
   "private": true,
   "files": [
     "typescript"
-  ]
+  ],
+  "exports": {
+    "./typescript/*": "./typescript/*.json"
+  }
 }
