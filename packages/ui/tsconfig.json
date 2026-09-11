@@ -1,0 +1,8 @@
+{
+  "extends": "@pairly/config/typescript/react-library.json",
+  "compilerOptions": {
+    "rootDir": "./src",
+    "outDir": "./dist"
+  },
+  "include": ["src/**/*"]
+}

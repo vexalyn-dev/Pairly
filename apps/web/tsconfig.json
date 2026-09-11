@@ -1,31 +1,13 @@
 {
+  "extends": "@pairly/config/typescript/nextjs.json",
   "compilerOptions": {
-    "target": "ES2022",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "strict": true,
-    "noEmit": true,
-    "esModuleInterop": true,
-    "module": "esnext",
-    "moduleResolution": "bundler",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "jsx": "react-jsx",
-    "incremental": true,
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ],
     "paths": {
-      "@/*": [
-        "./*"
-      ]
+      "@/*": ["./*"],
+      "@pairly/ui": ["../../packages/ui/src"],
+      "@pairly/types": ["../../packages/types/src"],
+      "@pairly/utils": ["../../packages/utils/src"],
+      "@pairly/validation": ["../../packages/validation/src"],
+      "@pairly/database": ["../../packages/database/src"]
     }
   },
   "include": [
@@ -35,7 +17,5 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
   ],
-  "exclude": [
-    "node_modules"
-  ]
+  "exclude": ["node_modules"]
 }
