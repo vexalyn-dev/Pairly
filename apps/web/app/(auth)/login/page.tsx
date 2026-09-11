@@ -19,7 +19,7 @@ function LoginForm() {
   const [showPassword, setShowPassword] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState<string | null>(
     callbackError === "auth_callback_failed"
-      ? "Sesi autentikasi kedaluwarsa atau tidak valid. Silakan masuk kembali."
+      ? "Tautan konfirmasi email telah diproses atau kedaluwarsa. Silakan masukkan email dan password untuk masuk."
       : null
   );
   const [isSubmitting, setIsSubmitting] = React.useState(false);
