@@ -1,99 +1,28 @@
 export default function HomePage() {
   return (
-    <main
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "24px",
-        backgroundColor: "#ffffff",
-        color: "#1f2937",
-        textAlign: "center",
-      }}
-    >
-      <div
-        style={{
-          maxWidth: "480px",
-          width: "100%",
-          padding: "40px 32px",
-          borderRadius: "24px",
-          border: "1px solid #fce7f3",
-          background: "linear-gradient(180deg, #ffffff 0%, #fff1f2 100%)",
-          boxShadow: "0 10px 25px -5px rgba(244, 63, 94, 0.08)",
-        }}
-      >
-        <div
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "8px",
-            padding: "6px 14px",
-            borderRadius: "9999px",
-            backgroundColor: "#ffe4e6",
-            color: "#e11d48",
-            fontSize: "13px",
-            fontWeight: 600,
-            marginBottom: "20px",
-          }}
-        >
-          <span>💗</span>
-          <span>Next.js 16 Active</span>
+    <main className="min-h-screen flex flex-col items-center justify-center p-6 bg-white text-slate-800">
+      <div className="max-w-md w-full p-10 rounded-3xl border border-pink-100 bg-gradient-to-b from-white via-white to-pink-50 shadow-romantic text-center transition-all duration-300 hover:shadow-glow">
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-pink-100 text-pairly-rose text-xs font-semibold mb-6">
+          <span className="text-sm">💗</span>
+          <span>Tailwind CSS &amp; Next.js 16 Active</span>
         </div>
 
-        <h1
-          style={{
-            fontSize: "36px",
-            fontWeight: 800,
-            letterSpacing: "-0.02em",
-            color: "#0f172a",
-            marginBottom: "8px",
-          }}
-        >
+        <h1 className="text-4xl font-extrabold tracking-tight text-slate-900 mb-2">
           Pairly
         </h1>
 
-        <p
-          style={{
-            fontSize: "18px",
-            fontWeight: 500,
-            color: "#e11d48",
-            marginBottom: "16px",
-          }}
-        >
+        <p className="text-lg font-medium text-pairly-rose mb-4">
           Make moments together.
         </p>
 
-        <p
-          style={{
-            fontSize: "14px",
-            lineHeight: 1.6,
-            color: "#64748b",
-            marginBottom: "28px",
-          }}
-        >
+        <p className="text-sm text-slate-500 leading-relaxed mb-8">
           A private realtime space for two people to make, play, and keep
           moments together.
         </p>
 
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            gap: "8px",
-            padding: "12px 16px",
-            borderRadius: "12px",
-            backgroundColor: "#ffffff",
-            border: "1px solid #fed7aa",
-            color: "#c2410c",
-            fontSize: "12px",
-            fontWeight: 600,
-          }}
-        >
+        <div className="flex items-center justify-center gap-2 px-4 py-3 rounded-2xl bg-white border border-rose-100 text-rose-600 text-xs font-semibold shadow-sm">
           <span>✨</span>
-          <span>Phase 1: Monorepo &amp; Web App Connected</span>
+          <span>Design Tokens: Soft Pink &amp; Rose Ready</span>
         </div>
       </div>
     </main>
