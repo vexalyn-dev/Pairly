@@ -1,6 +1,6 @@
 import type { Database as DatabaseGenerated } from "./database.types";
 
-export type Database = DatabaseGenerated;
+export type Database = Omit<DatabaseGenerated, "__InternalSupabase">;
 export type { Json } from "./database.types";
 
 // Convenient helper type aliases for Pairly tables

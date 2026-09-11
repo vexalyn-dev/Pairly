@@ -81,6 +81,17 @@ const config: Config = {
         "pairly-glow":
           "linear-gradient(180deg, rgba(255, 241, 242, 0.8) 0%, rgba(255, 255, 255, 1) 100%)",
       },
+      keyframes: {
+        "float-up": {
+          "0%": { opacity: "0", transform: "translateY(20px) scale(0.8)" },
+          "20%": { opacity: "1", transform: "translateY(-40px) scale(1.1)" },
+          "80%": { opacity: "0.9", transform: "translateY(-240px) scale(1)" },
+          "100%": { opacity: "0", transform: "translateY(-340px) scale(0.9)" },
+        },
+      },
+      animation: {
+        "float-up": "float-up 3.5s ease-out forwards",
+      },
     },
   },
   plugins: [require("tailwindcss-animate")],

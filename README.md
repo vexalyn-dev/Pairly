@@ -306,7 +306,7 @@ Pairly dikembangkan dan dirancang oleh:
 | Developer                                         | Role                                      |
 | :------------------------------------------------ | :---------------------------------------- |
 | **[Vexalyn Dev](https://github.com/vexalyn-dev)** | Lead Full-Stack Engineer & Core Architect |
-| **Raffa**                                         | Co-Developer & Full-Stack Engineer        |
+| **Raffa**                                         | Frontend Designer & UI/UX Developer       |
 
 ---
 
@@ -317,3 +317,5 @@ Pairly dikembangkan dan dirancang oleh:
 > **PROPRIETARY & CONFIDENTIAL**  
 > Proyek ini **BUKAN** proyek open source dan **TIDAK** dilisensikan di bawah lisensi publik (seperti MIT, Apache, GPL, dll).  
 > Seluruh kode sumber, aset desain, branding, nama, dan arsitektur adalah milik eksklusif **Vexalyn Dev** dan **Raffa**. Penggandaan, distribusi, publikasi, atau penggunaan tanpa izin tertulis dari pemilik hak cipta dilarang keras.
+
+![Pairly Copyright & Protection](https://files.catbox.moe/exsdkf.png)
