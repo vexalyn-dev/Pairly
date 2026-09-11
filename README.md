@@ -1,10 +1,6 @@
 # 💖 Pairly
 
-<div align="center">
-
-<br />
-
-```
+```text
   ____       _       _       
  |  _ \ __ _(_)_ __ | |_   _ 
  | |_) / _` | | '__|| | | | |
@@ -13,11 +9,9 @@
                        |___/ 
 ```
 
-### *Make moments together.*
+## *Make moments together.*
 
 A modern, intimate, and private realtime space designed for two people to create, play, and cherish moments together — crafted especially for couples and long-distance relationships.
-
-<br />
 
 [![Next.js](https://img.shields.io/badge/Next.js-16.3.4-black?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
 [![React](https://img.shields.io/badge/React-19.0.0-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
@@ -26,8 +20,6 @@ A modern, intimate, and private realtime space designed for two people to create
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
 [![Turborepo](https://img.shields.io/badge/Turborepo-Monorepo-EF4444?style=for-the-badge&logo=turborepo&logoColor=white)](https://turbo.build/)
 [![pnpm](https://img.shields.io/badge/pnpm-10.33+-F69220?style=for-the-badge&logo=pnpm&logoColor=white)](https://pnpm.io/)
-
-</div>
 
 ---
 
@@ -42,7 +34,7 @@ A modern, intimate, and private realtime space designed for two people to create
 
 ## 🏗️ Monorepo Architecture
 
-```
+```text
 pairly/
 ├── apps/
 │   └── web/                   # Next.js 16 (App Router + Turbopack + Tailwind + shadcn/ui)
@@ -67,24 +59,30 @@ pairly/
 Ikuti langkah-langkah di bawah ini untuk menginstal dan menjalankan Pairly di environment lokal Anda:
 
 ### 1. Prasyarat Sistem
+
 Pastikan tool berikut sudah terinstal di komputer Anda:
+
 - **Node.js**: `v18.18.0` atau yang lebih baru (disarankan **Node.js v22 LTS**)
 - **pnpm**: `v9.0.0` atau yang lebih baru (disarankan **pnpm v10+**)
 - **Git**
 
 Jika belum memiliki `pnpm`, instal melalui corepack atau npm:
+
 ```bash
 npm install -g pnpm
 ```
 
 ### 2. Clone Repository
+
 ```bash
 git clone https://github.com/vexalyn-dev/Pairly.git
 cd Pairly
 ```
 
 ### 3. Instalasi Dependencies
+
 Jalankan perintah `pnpm install` di root repository. `pnpm` secara otomatis akan mengunduh dependencies untuk seluruh aplikasi dan shared packages:
+
 ```bash
 pnpm install
 ```
@@ -92,6 +90,7 @@ pnpm install
 > ⚠️ **Catatan Ukuran:** Folder `node_modules/`, `.next/`, dan `.turbo/` otomatis diabaikan oleh `.gitignore` sehingga repository tetap ringan dan bersih.
 
 ### 4. Konfigurasi Environment Variables
+
 Salin template `.env.example` menjadi `.env.local`:
 
 ```bash
@@ -103,6 +102,7 @@ cp .env.example .env.local
 ```
 
 Buka file `.env.local` dan masukkan kredensial project Supabase Anda:
+
 ```env
 # Supabase Public API (Client & Server)
 NEXT_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
@@ -116,15 +116,20 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
 ### 5. Menjalankan Server Development
+
 Jalankan server development dengan Turborepo:
+
 ```bash
 pnpm dev
 ```
+
 Buka browser Anda dan akses:
 👉 **[http://localhost:3000](http://localhost:3000)**
 
 ### 6. Build & Quality Verification
+
 Untuk memastikan seluruh packages dan aplikasi terkompilasi tanpa error:
+
 ```bash
 # Production build
 pnpm build
@@ -141,7 +146,7 @@ pnpm lint
 ## 🛠️ Tech Stack Overview
 
 | Category | Technology |
-|---|---|
+| :--- | :--- |
 | **Framework** | [Next.js 16](https://nextjs.org/) (App Router, Turbopack) |
 | **Core UI** | [React 19](https://react.dev/), [Tailwind CSS](https://tailwindcss.com/), [shadcn/ui](https://ui.shadcn.com/) |
 | **Icons** | [Lucide React](https://lucide.dev/) |
@@ -157,7 +162,7 @@ pnpm lint
 Pairly dikembangkan dan dirancang oleh:
 
 | Developer | Role |
-|---|---|
+| :--- | :--- |
 | **[Vexalyn Dev](https://github.com/vexalyn-dev)** | Lead Full-Stack Engineer & Core Architect |
 | **Raffa** | Co-Developer & Full-Stack Engineer |
 
