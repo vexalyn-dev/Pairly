@@ -38,18 +38,17 @@ export const profileUpdateSchema = z.object({
     .trim()
     .min(3, "Username must be at least 3 characters")
     .max(20, "Username cannot exceed 20 characters")
-    .regex(/^[a-z0-9_]+$/, "Username must only contain lowercase letters, numbers, and underscores")
+    .regex(
+      /^[a-z0-9_]+$/,
+      "Username must only contain lowercase letters, numbers, and underscores"
+    )
     .optional(),
   display_name: z
     .string()
     .trim()
     .min(1, "Display name cannot be empty")
     .max(50, "Display name cannot exceed 50 characters"),
-  bio: z
-    .string()
-    .trim()
-    .max(160, "Bio cannot exceed 160 characters")
-    .optional(),
+  bio: z.string().trim().max(160, "Bio cannot exceed 160 characters").optional(),
   avatar_url: z.string().url("Invalid avatar URL").optional().nullable(),
 });
 

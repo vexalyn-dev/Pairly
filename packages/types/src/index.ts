@@ -98,7 +98,8 @@ export interface MemoryMedia {
   created_at: string;
 }
 
-export type NotificationType = "room_invite" | "activity_start" | "memory_added" | "reaction";
+export type NotificationType =
+  "room_invite" | "activity_start" | "memory_added" | "reaction";
 
 export interface Notification {
   id: string;

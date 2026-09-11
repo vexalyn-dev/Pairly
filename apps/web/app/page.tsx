@@ -1,4 +1,10 @@
-import { Heart, Sparkles, Layers, Database as DatabaseIcon, CheckCircle2 } from "lucide-react";
+import {
+  Heart,
+  Sparkles,
+  Layers,
+  Database as DatabaseIcon,
+  CheckCircle2,
+} from "lucide-react";
 import { Button } from "@pairly/ui";
 import { formatDate, generateRoomCode } from "@pairly/utils";
 import { roomCodeSchema } from "@pairly/validation";
@@ -51,8 +57,8 @@ export default async function HomePage() {
         </p>
 
         <p className="text-sm text-slate-500 leading-relaxed mb-6">
-          A private realtime space for two people to make, play, and keep
-          moments together.
+          A private realtime space for two people to make, play, and keep moments
+          together.
         </p>
 
         {/* Demo Shared Package Integration */}
@@ -104,7 +110,9 @@ export default async function HomePage() {
 
         <div className="flex items-center justify-center gap-2 px-4 py-3 rounded-2xl bg-white border border-rose-100 text-rose-600 text-xs font-semibold shadow-sm">
           <Layers className="w-4 h-4 text-rose-500" />
-          <span>Shared: @pairly/ui, @pairly/utils, @pairly/database, @pairly/validation</span>
+          <span>
+            Shared: @pairly/ui, @pairly/utils, @pairly/database, @pairly/validation
+          </span>
         </div>
       </div>
     </main>

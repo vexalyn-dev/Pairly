@@ -3,8 +3,7 @@ import type { Database } from "./types";
 
 export interface CookieMethods {
   getAll: () =>
-    | { name: string; value: string }[]
-    | Promise<{ name: string; value: string }[]>;
+    { name: string; value: string }[] | Promise<{ name: string; value: string }[]>;
   setAll?: (
     cookies: { name: string; value: string; options: CookieOptions }[]
   ) => void | Promise<void>;
@@ -24,9 +23,7 @@ export function createServerClientInstance(
     process.env.NEXT_PUBLIC_SUPABASE_URL ||
     "https://placeholder-project.supabase.co";
   const key =
-    supabaseKey ||
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-    "placeholder-anon-key";
+    supabaseKey || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "placeholder-anon-key";
 
   return createServerClient<Database>(url, key, {
     cookies: {

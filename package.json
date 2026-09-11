@@ -6,7 +6,9 @@
     "dev": "turbo dev",
     "lint": "turbo lint",
     "typecheck": "turbo typecheck",
-    "clean": "turbo clean"
+    "clean": "turbo clean",
+    "db:list": "npx -y supabase migration list",
+    "db:types": "npx -y supabase gen types typescript --project-id lreewdqjkqhkofdjxbmo > packages/database/src/database.types.ts"
   },
   "devDependencies": {
     "turbo": "^2.10.0",
