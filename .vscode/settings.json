@@ -4,6 +4,5 @@
   "less.lint.unknownAtRules": "ignore",
   "json.schemaDownload.enable": false,
   "typescript.tsdk": "node_modules/typescript/lib",
-  "editor.formatOnSave": true,
-  "editor.defaultFormatter": "esbenp.prettier-vscode"
+  "editor.formatOnSave": true
 }
