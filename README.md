@@ -1,9 +1,8 @@
-<div align="center">
-
-<img src="https://files.catbox.moe/1c3663.png" alt="Pairly Banner" width="100%" style="border-radius: 12px; margin-bottom: 16px;" />
-
 # 💗 Pairly
-### _Make moments together._
+
+![Pairly Banner](https://files.catbox.moe/1c3663.png)
+
+## _Make moments together._
 
 A modern, intimate, and private realtime platform for two people to create, play, and cherish moments together — crafted especially for couples and long-distance relationships.
 
@@ -15,8 +14,6 @@ A modern, intimate, and private realtime platform for two people to create, play
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
 [![Turborepo](https://img.shields.io/badge/Turborepo-Monorepo-EF4444?style=for-the-badge&logo=turborepo&logoColor=white)](https://turbo.build/)
 [![pnpm](https://img.shields.io/badge/pnpm-10.33+-F69220?style=for-the-badge&logo=pnpm&logoColor=white)](https://pnpm.io/)
-
-</div>
 
 ---
 
@@ -39,22 +36,22 @@ Pairly is powered by Supabase PostgreSQL with **10 core application tables** and
 ```mermaid
 erDiagram
     AUTH_USERS ||--|| PROFILES : "1 : 1 (id)"
-    
+
     PROFILES ||--o{ ROOMS : "creates (created_by)"
     PROFILES ||--o{ ROOM_MEMBERS : "joins (user_id)"
     ROOMS ||--|{ ROOM_MEMBERS : "contains max 2 (room_id)"
-    
+
     ROOMS ||--o{ ACTIVITY_SESSIONS : "hosts (room_id)"
     ACTIVITIES ||--o{ ACTIVITY_SESSIONS : "catalog (activity_id)"
     ACTIVITY_SESSIONS ||--o{ ACTIVITY_EVENTS : "records (session_id)"
     PROFILES ||--o{ ACTIVITY_EVENTS : "triggers (user_id)"
-    
+
     ROOMS ||--o{ MEMORIES : "belongs to (room_id)"
     PROFILES ||--o{ MEMORIES : "authored by (created_by)"
     MEMORIES ||--o{ MEMORY_MEDIA : "attaches (memory_id)"
-    
+
     PROFILES ||--o{ NOTIFICATIONS : "receives (user_id)"
-    
+
     PROFILES ||--o{ REPORTS : "reports (reporter_id)"
     ROOMS ||--o{ REPORTS : "reported room (room_id)"
     PROFILES ||--o{ REPORTS : "reported user (target_user_id)"
@@ -172,22 +169,22 @@ erDiagram
 
 All migrations live under [`supabase/migrations/`](./supabase/migrations/) and execute lexicographically:
 
-| Migration File | Target & Purpose | Security / Rules |
-| :--- | :--- | :--- |
-| `0001_extensions.sql` | `uuid-ossp`, `pgcrypto` in `extensions` schema | Cryptographic random generation |
-| `0002_profiles.sql` | `profiles` table & `handle_new_user()` trigger | Auto-creates profile upon Supabase Auth signup |
-| `0003_rooms.sql` | `rooms` & `room_members` tables | `generate_room_code()` + Max 2 members lock trigger |
-| `0004_activities.sql` | `activities` interactive games catalog | Read-only catalog for regular users |
-| `0005_activity_sessions.sql` | `activity_sessions` stateful room instances | Persistent session state tracking (`state JSONB`) |
-| `0006_activity_events.sql` | `activity_events` append-only audit & milestones | Audit trail (ephemeral state uses Realtime) |
-| `0007_memories.sql` | `memories` & `memory_media` tables | Shared romantic scrapbook & media references |
-| `0008_notifications.sql` | `notifications` in-app alerts | Partner activity notifications & unread index |
-| `0009_reports.sql` | `reports` safety & moderation | User moderation foundation |
-| `0010_functions_and_triggers.sql` | `set_updated_at()`, `is_room_member()`, `is_room_owner()` | Recursion-safe `SECURITY DEFINER` RLS helpers |
-| `0011_rls.sql` | Row Level Security policies on all 10 tables | Strict `auth.uid()` and room membership isolation |
-| `0012_realtime.sql` | Realtime publication configuration | `REPLICA IDENTITY FULL` on collaborative tables |
-| `0013_storage.sql` | Buckets (`avatars`, `memories`, `photobooth`) | Room-aware Storage RLS for private couple media |
-| `seed.sql` | Initial catalog activities | Idempotent `ON CONFLICT (slug) DO UPDATE` |
+| Migration File                    | Target & Purpose                                          | Security / Rules                                    |
+| :-------------------------------- | :-------------------------------------------------------- | :-------------------------------------------------- |
+| `0001_extensions.sql`             | `uuid-ossp`, `pgcrypto` in `extensions` schema            | Cryptographic random generation                     |
+| `0002_profiles.sql`               | `profiles` table & `handle_new_user()` trigger            | Auto-creates profile upon Supabase Auth signup      |
+| `0003_rooms.sql`                  | `rooms` & `room_members` tables                           | `generate_room_code()` + Max 2 members lock trigger |
+| `0004_activities.sql`             | `activities` interactive games catalog                    | Read-only catalog for regular users                 |
+| `0005_activity_sessions.sql`      | `activity_sessions` stateful room instances               | Persistent session state tracking (`state JSONB`)   |
+| `0006_activity_events.sql`        | `activity_events` append-only audit & milestones          | Audit trail (ephemeral state uses Realtime)         |
+| `0007_memories.sql`               | `memories` & `memory_media` tables                        | Shared romantic scrapbook & media references        |
+| `0008_notifications.sql`          | `notifications` in-app alerts                             | Partner activity notifications & unread index       |
+| `0009_reports.sql`                | `reports` safety & moderation                             | User moderation foundation                          |
+| `0010_functions_and_triggers.sql` | `set_updated_at()`, `is_room_member()`, `is_room_owner()` | Recursion-safe `SECURITY DEFINER` RLS helpers       |
+| `0011_rls.sql`                    | Row Level Security policies on all 10 tables              | Strict `auth.uid()` and room membership isolation   |
+| `0012_realtime.sql`               | Realtime publication configuration                        | `REPLICA IDENTITY FULL` on collaborative tables     |
+| `0013_storage.sql`                | Buckets (`avatars`, `memories`, `photobooth`)             | Room-aware Storage RLS for private couple media     |
+| `seed.sql`                        | Initial catalog activities                                | Idempotent `ON CONFLICT (slug) DO UPDATE`           |
 
 ---
 
@@ -289,16 +286,16 @@ pnpm build
 
 ## 🛠️ Tech Stack Overview
 
-| Category | Technology |
-| :--- | :--- |
-| **Framework** | [Next.js 16](https://nextjs.org/) (App Router, Turbopack) |
-| **Core UI** | [React 19](https://react.dev/), [Tailwind CSS](https://tailwindcss.com/), [shadcn/ui](https://ui.shadcn.com/) |
-| **Icons** | [Lucide React](https://lucide.dev/) |
-| **Database & Realtime** | [Supabase](https://supabase.com/) (PostgreSQL 15+, Realtime, Storage, Auth) |
-| **Database Types** | Auto-generated TypeScript Database Types (`database.types.ts`) |
-| **Validation** | [Zod](https://zod.dev/) |
-| **Monorepo Engine** | [Turborepo](https://turbo.build/) & [pnpm Workspaces](https://pnpm.io/workspaces) |
-| **Formatting** | [Prettier](https://prettier.io/) |
+| Category                | Technology                                                                                                    |
+| :---------------------- | :------------------------------------------------------------------------------------------------------------ |
+| **Framework**           | [Next.js 16](https://nextjs.org/) (App Router, Turbopack)                                                     |
+| **Core UI**             | [React 19](https://react.dev/), [Tailwind CSS](https://tailwindcss.com/), [shadcn/ui](https://ui.shadcn.com/) |
+| **Icons**               | [Lucide React](https://lucide.dev/)                                                                           |
+| **Database & Realtime** | [Supabase](https://supabase.com/) (PostgreSQL 15+, Realtime, Storage, Auth)                                   |
+| **Database Types**      | Auto-generated TypeScript Database Types (`database.types.ts`)                                                |
+| **Validation**          | [Zod](https://zod.dev/)                                                                                       |
+| **Monorepo Engine**     | [Turborepo](https://turbo.build/) & [pnpm Workspaces](https://pnpm.io/workspaces)                             |
+| **Formatting**          | [Prettier](https://prettier.io/)                                                                              |
 
 ---
 
@@ -306,10 +303,10 @@ pnpm build
 
 Pairly dikembangkan dan dirancang oleh:
 
-| Developer | Role |
-| :--- | :--- |
+| Developer                                         | Role                                      |
+| :------------------------------------------------ | :---------------------------------------- |
 | **[Vexalyn Dev](https://github.com/vexalyn-dev)** | Lead Full-Stack Engineer & Core Architect |
-| **Raffa** | Co-Developer & Full-Stack Engineer |
+| **Raffa**                                         | Co-Developer & Full-Stack Engineer        |
 
 ---
 
