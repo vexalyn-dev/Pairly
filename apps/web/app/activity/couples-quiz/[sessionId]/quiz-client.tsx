@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import * as React from "react";
 import Link from "next/link";
@@ -6,13 +6,15 @@ import { ArrowLeft, Check, Heart, Loader2, Radio, Sparkles, Trophy } from "lucid
 import { Button } from "@pairly/ui";
 import { createClient } from "@/lib/supabase/client";
 import {
-  COUPLES_QUIZ_QUESTIONS,
   finishCouplesQuizAction,
   startCouplesQuizAction,
   submitCouplesQuizAnswerAction,
+} from "@/lib/quiz/actions";
+import {
+  COUPLES_QUIZ_QUESTIONS,
   type CouplesQuizSession,
   type CouplesQuizState,
-} from "@/lib/quiz/actions";
+} from "@/lib/quiz/shared";
 
 interface CouplesQuizClientProps {
   currentUserId: string;
