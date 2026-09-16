@@ -141,6 +141,23 @@ export const appendActivityEventSchema = z.object({
   payload: z.record(z.string(), z.unknown()).optional(),
 });
 
+export const couplesQuizSessionSchema = z.object({
+  sessionId: z.string().uuid("Sesi Couples Quiz tidak valid"),
+});
+
+export const submitCouplesQuizAnswerSchema = couplesQuizSessionSchema.extend({
+  questionId: z
+    .string()
+    .trim()
+    .min(2, "Pertanyaan tidak valid")
+    .max(80, "Pertanyaan tidak valid"),
+  answer: z
+    .string()
+    .trim()
+    .min(1, "Jawaban tidak boleh kosong")
+    .max(500, "Jawaban maksimal 500 karakter"),
+});
+
 // Type inferences
 export type CreateRoomInput = z.infer<typeof createRoomSchema>;
 export type JoinRoomInput = z.infer<typeof joinRoomSchema>;
@@ -152,3 +169,7 @@ export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
 export type StartActivitySessionInput = z.infer<typeof startActivitySessionSchema>;
 export type FinishActivitySessionInput = z.infer<typeof finishActivitySessionSchema>;
 export type AppendActivityEventInput = z.infer<typeof appendActivityEventSchema>;
+export type CouplesQuizSessionInput = z.infer<typeof couplesQuizSessionSchema>;
+export type SubmitCouplesQuizAnswerInput = z.infer<
+  typeof submitCouplesQuizAnswerSchema
+>;

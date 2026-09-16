@@ -41,7 +41,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
 
       {/* Footer */}
       <footer className="relative z-10 py-6 text-center text-xs text-slate-400">
-        <p>© {new Date().getFullYear()} Pairly. Crafted with 💗 for two people.</p>
+        <p>© {new Date().getFullYear()} Pairly. Di buat degan 💗 Oleh 2 Cowok Ganteng.</p>
       </footer>
     </div>
   );

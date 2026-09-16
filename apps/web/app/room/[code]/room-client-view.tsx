@@ -132,9 +132,9 @@ export function RoomClientView({
     ActivitySessionSummary[]
   >([]);
   const [isLoadingActivities, setIsLoadingActivities] = React.useState(true);
-  const [startingActivitySlug, setStartingActivitySlug] = React.useState<
-    string | null
-  >(null);
+  const [startingActivitySlug, setStartingActivitySlug] = React.useState<string | null>(
+    null
+  );
   const [activityError, setActivityError] = React.useState<string | null>(null);
   const [activityNotice, setActivityNotice] = React.useState<string | null>(null);
 
@@ -217,6 +217,10 @@ export function RoomClientView({
 
       setActivityNotice("Aktivitas dimulai. Pasangan akan melihat sesi ini realtime.");
       await refreshActivitySessions();
+
+      if (activitySlug === "couples-quiz" && result.sessionId) {
+        router.push(`/activity/couples-quiz/${result.sessionId}`);
+      }
     } catch {
       setActivityError("Terjadi kendala jaringan saat memulai aktivitas.");
     } finally {
@@ -693,7 +697,9 @@ export function RoomClientView({
 
             {activitySessions.length > 0 && (
               <div className="text-xs text-slate-500 bg-white/80 border border-pink-100 rounded-2xl px-4 py-2 shadow-soft">
-                <span className="font-bold text-slate-800">{activitySessions.length}</span>{" "}
+                <span className="font-bold text-slate-800">
+                  {activitySessions.length}
+                </span>{" "}
                 sesi terbaru tersimpan
               </div>
             )}
@@ -750,11 +756,21 @@ export function RoomClientView({
                             {session.id.slice(0, 8)} · {session.status}
                           </p>
                         </div>
-                        <span
-                          className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border ${statusTone}`}
-                        >
-                          {session.status.replace("_", " ")}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          {session.activity?.slug === "couples-quiz" && (
+                            <Link
+                              href={`/activity/couples-quiz/${session.id}`}
+                              className="rounded-full bg-rose-500 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white shadow-soft hover:bg-rose-600"
+                            >
+                              Main
+                            </Link>
+                          )}
+                          <span
+                            className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border ${statusTone}`}
+                          >
+                            {session.status.replace("_", " ")}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   );
@@ -802,7 +818,8 @@ export function RoomClientView({
                         {activity.name}
                       </h3>
                       <p className="text-xs text-slate-500 leading-relaxed">
-                        {activity.description || "Aktivitas realtime untuk dimainkan berdua."}
+                        {activity.description ||
+                          "Aktivitas realtime untuk dimainkan berdua."}
                       </p>
                     </div>
 
@@ -834,7 +851,9 @@ export function RoomClientView({
           ) : (
             <div className="rounded-3xl border border-dashed border-pink-200 bg-white/80 p-8 text-center shadow-soft">
               <Sparkles className="w-8 h-8 text-rose-400 mx-auto mb-3" />
-              <h3 className="text-sm font-bold text-slate-900">Belum ada aktivitas aktif</h3>
+              <h3 className="text-sm font-bold text-slate-900">
+                Belum ada aktivitas aktif
+              </h3>
               <p className="text-xs text-slate-500 mt-1">
                 Jalankan migration seed aktivitas untuk mengisi katalog Pairly.
               </p>
