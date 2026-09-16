@@ -108,6 +108,39 @@ export const resetPasswordSchema = z
     path: ["confirm_password"],
   });
 
+// ==========================================
+// ACTIVITY VALIDATION SCHEMAS
+// ==========================================
+
+export const activitySlugSchema = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .min(2, "Slug aktivitas minimal 2 karakter")
+  .max(80, "Slug aktivitas maksimal 80 karakter")
+  .regex(/^[a-z0-9-]+$/, "Slug aktivitas hanya boleh berisi huruf kecil, angka, dan dash");
+
+export const startActivitySessionSchema = z.object({
+  roomId: z.string().uuid("Room tidak valid"),
+  activitySlug: activitySlugSchema,
+});
+
+export const finishActivitySessionSchema = z.object({
+  sessionId: z.string().uuid("Sesi aktivitas tidak valid"),
+  status: z.enum(["completed", "abandoned", "cancelled"]),
+  state: z.record(z.string(), z.unknown()).optional(),
+});
+
+export const appendActivityEventSchema = z.object({
+  sessionId: z.string().uuid("Sesi aktivitas tidak valid"),
+  eventType: z
+    .string()
+    .trim()
+    .min(2, "Tipe event minimal 2 karakter")
+    .max(80, "Tipe event maksimal 80 karakter"),
+  payload: z.record(z.string(), z.unknown()).optional(),
+});
+
 // Type inferences
 export type CreateRoomInput = z.infer<typeof createRoomSchema>;
 export type JoinRoomInput = z.infer<typeof joinRoomSchema>;
@@ -116,3 +149,6 @@ export type LoginInput = z.infer<typeof loginSchema>;
 export type SignUpInput = z.infer<typeof signUpSchema>;
 export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
 export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
+export type StartActivitySessionInput = z.infer<typeof startActivitySessionSchema>;
+export type FinishActivitySessionInput = z.infer<typeof finishActivitySessionSchema>;
+export type AppendActivityEventInput = z.infer<typeof appendActivityEventSchema>;

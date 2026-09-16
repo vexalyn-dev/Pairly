@@ -25,9 +25,15 @@ import {
   AlertCircle,
   Send,
 } from "lucide-react";
-import type { RoomRow, ProfileRow } from "@pairly/database";
+import type { ActivityRow, RoomRow, ProfileRow } from "@pairly/database";
 import { Button } from "@pairly/ui";
 import { createClient } from "@/lib/supabase/client";
+import {
+  getActivitiesAction,
+  getRoomActivitySessionsAction,
+  startActivitySessionAction,
+  type ActivitySessionSummary,
+} from "@/lib/activity/actions";
 import { getRoomDetailsAction, leaveRoomAction } from "@/lib/room/actions";
 
 interface RoomClientViewProps {
@@ -50,56 +56,36 @@ interface FloatingReaction {
   leftPercent: number;
 }
 
-const ACTIVITY_PLACEHOLDERS = [
-  {
-    id: "couples-quiz",
-    name: "Couples Quiz",
-    category: "Quiz & Trivia",
-    description: "Kuis seru untuk menguji seberapa dalam kamu mengenal satu sama lain.",
-    icon: Gamepad2,
-    color: "from-rose-500 to-pink-500",
-  },
-  {
-    id: "photobooth",
-    name: "Retro Photobooth",
-    category: "Memories & Media",
-    description: "Ambil strip foto bergaya retro berdua dengan frame romantis.",
-    icon: Camera,
-    color: "from-amber-500 to-rose-500",
-  },
-  {
-    id: "shared-canvas",
-    name: "Shared Canvas",
-    category: "Creative & Art",
-    description: "Menggambar dan corat-coret bersama di kanvas realtime.",
-    icon: Paintbrush,
-    color: "from-purple-500 to-pink-500",
-  },
-  {
-    id: "memories-timeline",
-    name: "Romantic Memories",
-    category: "Memories & Media",
-    description: "Abadikan timeline perjalanan cinta, tanggal jadian, dan jurnal berdua.",
-    icon: BookHeart,
-    color: "from-pink-500 to-rose-400",
-  },
-  {
-    id: "truth-or-dare",
-    name: "Truth or Dare",
-    category: "Social & Fun",
-    description: "Pertanyaan intim dan tantangan manis untuk mendekatkan hati.",
-    icon: Flame,
-    color: "from-red-500 to-pink-500",
-  },
-  {
-    id: "heartbeat-sync",
-    name: "Heartbeat Sync",
-    category: "Sensory & Romance",
-    description: "Sinkronisasi detak jantung dan sentuhan virtual jarak jauh.",
-    icon: Activity,
-    color: "from-rose-400 to-pink-600",
-  },
-];
+const ACTIVITY_ICON_BY_SLUG = {
+  "couples-quiz": Gamepad2,
+  photobooth: Camera,
+  "shared-canvas": Paintbrush,
+  "memories-timeline": BookHeart,
+  "truth-or-dare": Flame,
+  "heartbeat-sync": Activity,
+} as const;
+
+const ACTIVITY_CATEGORY_META = {
+  game: { label: "Games", color: "from-red-500 to-pink-500" },
+  quiz: { label: "Quiz & Trivia", color: "from-rose-500 to-pink-500" },
+  canvas: { label: "Creative & Art", color: "from-purple-500 to-pink-500" },
+  moment: { label: "Memories & Media", color: "from-amber-500 to-rose-500" },
+  watch: { label: "Sensory & Romance", color: "from-rose-400 to-pink-600" },
+} as const;
+
+function getActivityVisual(activity: ActivityRow) {
+  const meta = ACTIVITY_CATEGORY_META[
+    activity.category as keyof typeof ACTIVITY_CATEGORY_META
+  ] || { label: activity.category, color: "from-slate-500 to-slate-700" };
+
+  return {
+    Icon:
+      ACTIVITY_ICON_BY_SLUG[activity.slug as keyof typeof ACTIVITY_ICON_BY_SLUG] ||
+      Sparkles,
+    label: meta.label,
+    color: meta.color,
+  };
+}
 
 const REACTION_SHORTCUTS = [
   { emoji: "💓", label: "Detak Jantung" },
@@ -139,6 +125,18 @@ export function RoomClientView({
   const [isLeaveModalOpen, setIsLeaveModalOpen] = React.useState(false);
   const [isLeaving, setIsLeaving] = React.useState(false);
   const [leaveError, setLeaveError] = React.useState<string | null>(null);
+
+  // Activity Engine state
+  const [activities, setActivities] = React.useState<ActivityRow[]>([]);
+  const [activitySessions, setActivitySessions] = React.useState<
+    ActivitySessionSummary[]
+  >([]);
+  const [isLoadingActivities, setIsLoadingActivities] = React.useState(true);
+  const [startingActivitySlug, setStartingActivitySlug] = React.useState<
+    string | null
+  >(null);
+  const [activityError, setActivityError] = React.useState<string | null>(null);
+  const [activityNotice, setActivityNotice] = React.useState<string | null>(null);
 
   // Realtime Supabase Channel Reference
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -190,6 +188,77 @@ export function RoomClientView({
       });
     }
   };
+
+  const refreshActivitySessions = React.useCallback(async () => {
+    const result = await getRoomActivitySessionsAction(room.id);
+    if (result.success) {
+      setActivitySessions(result.sessions);
+      return;
+    }
+
+    setActivityError(result.error || "Gagal memuat sesi aktivitas.");
+  }, [room.id]);
+
+  const handleStartActivity = async (activitySlug: string) => {
+    setStartingActivitySlug(activitySlug);
+    setActivityError(null);
+    setActivityNotice(null);
+
+    try {
+      const result = await startActivitySessionAction({
+        roomId: room.id,
+        activitySlug,
+      });
+
+      if (!result.success) {
+        setActivityError(result.error || "Gagal memulai aktivitas.");
+        return;
+      }
+
+      setActivityNotice("Aktivitas dimulai. Pasangan akan melihat sesi ini realtime.");
+      await refreshActivitySessions();
+    } catch {
+      setActivityError("Terjadi kendala jaringan saat memulai aktivitas.");
+    } finally {
+      setStartingActivitySlug(null);
+    }
+  };
+
+  React.useEffect(() => {
+    let isMounted = true;
+
+    async function loadActivityPanel() {
+      setIsLoadingActivities(true);
+      setActivityError(null);
+
+      const [activitiesResult, sessionsResult] = await Promise.all([
+        getActivitiesAction(),
+        getRoomActivitySessionsAction(room.id),
+      ]);
+
+      if (!isMounted) return;
+
+      if (activitiesResult.success) {
+        setActivities(activitiesResult.activities);
+      } else {
+        setActivityError(activitiesResult.error || "Gagal memuat aktivitas.");
+      }
+
+      if (sessionsResult.success) {
+        setActivitySessions(sessionsResult.sessions);
+      } else {
+        setActivityError(sessionsResult.error || "Gagal memuat sesi aktivitas.");
+      }
+
+      setIsLoadingActivities(false);
+    }
+
+    loadActivityPanel();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [room.id]);
 
   // Set up Supabase Realtime (Presence, Broadcast & Room Members Change)
   React.useEffect(() => {
@@ -270,6 +339,32 @@ export function RoomClientView({
       }
     );
 
+    // 4. Listen to Activity Engine changes for this room
+    channel.on(
+      "postgres_changes",
+      {
+        event: "*",
+        schema: "public",
+        table: "activity_sessions",
+        filter: `room_id=eq.${room.id}`,
+      },
+      async () => {
+        await refreshActivitySessions();
+      }
+    );
+
+    channel.on(
+      "postgres_changes",
+      {
+        event: "INSERT",
+        schema: "public",
+        table: "activity_events",
+      },
+      async () => {
+        await refreshActivitySessions();
+      }
+    );
+
     // Subscribe and track presence
     channel.subscribe(async (status) => {
       if (status === "SUBSCRIBED") {
@@ -289,6 +384,7 @@ export function RoomClientView({
     room.code,
     currentUserId,
     currentUserMember?.profile.display_name,
+    refreshActivitySessions,
     triggerReactionDisplay,
   ]);
 
@@ -583,58 +679,167 @@ export function RoomClientView({
 
         {/* Activities Section */}
         <section>
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-6">
             <div>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-50 border border-rose-100 text-rose-600 text-[11px] font-bold uppercase tracking-[0.2em] mb-3">
+                <Radio className="w-3.5 h-3.5" />
+                Phase 4 Engine
+              </div>
               <h2 className="text-xl font-bold text-slate-900">Aktivitas Berdua 🎲</h2>
               <p className="text-xs text-slate-500 mt-0.5">
-                Pilih aktivitas untuk dimainkan bersama pasangan secara realtime
+                Pilih aktivitas untuk membuat sesi realtime yang bisa dilihat pasangan.
               </p>
             </div>
+
+            {activitySessions.length > 0 && (
+              <div className="text-xs text-slate-500 bg-white/80 border border-pink-100 rounded-2xl px-4 py-2 shadow-soft">
+                <span className="font-bold text-slate-800">{activitySessions.length}</span>{" "}
+                sesi terbaru tersimpan
+              </div>
+            )}
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {ACTIVITY_PLACEHOLDERS.map((act) => {
-              const Icon = act.icon;
-              return (
-                <div
-                  key={act.id}
-                  className="group bg-white/90 backdrop-blur-md border border-pink-100/80 rounded-3xl p-6 shadow-soft hover:shadow-romantic transition-all flex flex-col justify-between"
-                >
-                  <div>
+          {(activityError || activityNotice) && (
+            <div
+              role="status"
+              className={`mb-5 p-3 rounded-2xl border text-xs flex items-start gap-2 ${
+                activityError
+                  ? "bg-rose-50 border-rose-200 text-rose-700"
+                  : "bg-emerald-50 border-emerald-200 text-emerald-700"
+              }`}
+            >
+              {activityError ? (
+                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+              ) : (
+                <Check className="w-4 h-4 shrink-0 mt-0.5" />
+              )}
+              <span>{activityError || activityNotice}</span>
+            </div>
+          )}
+
+          {activitySessions.length > 0 && (
+            <div className="mb-6 bg-white/90 backdrop-blur-md border border-pink-100/80 rounded-3xl p-5 shadow-soft">
+              <div className="flex items-center justify-between gap-3 mb-4">
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900">Sesi Realtime</h3>
+                  <p className="text-[11px] text-slate-500">
+                    Foundation sesi aktif dan histori singkat room ini.
+                  </p>
+                </div>
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {activitySessions.slice(0, 4).map((session) => {
+                  const statusTone =
+                    session.status === "waiting" || session.status === "in_progress"
+                      ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                      : "bg-slate-50 text-slate-500 border-slate-200";
+
+                  return (
                     <div
-                      className={`w-12 h-12 rounded-2xl bg-gradient-to-tr ${act.color} flex items-center justify-center text-white shadow-soft mb-4 group-hover:scale-105 transition-transform`}
+                      key={session.id}
+                      className="rounded-2xl border border-slate-100 bg-gradient-to-br from-white to-pink-50/30 p-4"
                     >
-                      <Icon className="w-6 h-6" />
+                      <div className="flex items-center justify-between gap-3">
+                        <div>
+                          <p className="text-sm font-bold text-slate-900">
+                            {session.activity?.name || "Aktivitas"}
+                          </p>
+                          <p className="text-[11px] text-slate-400 font-mono mt-0.5">
+                            {session.id.slice(0, 8)} · {session.status}
+                          </p>
+                        </div>
+                        <span
+                          className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border ${statusTone}`}
+                        >
+                          {session.status.replace("_", " ")}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {isLoadingActivities ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[0, 1, 2].map((item) => (
+                <div
+                  key={item}
+                  className="h-64 rounded-3xl bg-white/80 border border-pink-100 shadow-soft animate-pulse"
+                />
+              ))}
+            </div>
+          ) : activities.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {activities.map((activity) => {
+                const visual = getActivityVisual(activity);
+                const Icon = visual.Icon;
+                const isStarting = startingActivitySlug === activity.slug;
+
+                return (
+                  <div
+                    key={activity.id}
+                    className="group bg-white/90 backdrop-blur-md border border-pink-100/80 rounded-3xl p-6 shadow-soft hover:shadow-romantic transition-all flex flex-col justify-between"
+                  >
+                    <div>
+                      <div
+                        className={`w-12 h-12 rounded-2xl bg-gradient-to-tr ${visual.color} flex items-center justify-center text-white shadow-soft mb-4 group-hover:scale-105 transition-transform`}
+                      >
+                        {activity.icon ? (
+                          <span className="text-2xl leading-none">{activity.icon}</span>
+                        ) : (
+                          <Icon className="w-6 h-6" />
+                        )}
+                      </div>
+
+                      <span className="text-[11px] font-semibold text-rose-500 tracking-wider uppercase">
+                        {visual.label}
+                      </span>
+                      <h3 className="text-lg font-bold text-slate-900 mt-1 mb-2">
+                        {activity.name}
+                      </h3>
+                      <p className="text-xs text-slate-500 leading-relaxed">
+                        {activity.description || "Aktivitas realtime untuk dimainkan berdua."}
+                      </p>
                     </div>
 
-                    <span className="text-[11px] font-semibold text-rose-500 tracking-wider uppercase">
-                      {act.category}
-                    </span>
-                    <h3 className="text-lg font-bold text-slate-900 mt-1 mb-2">
-                      {act.name}
-                    </h3>
-                    <p className="text-xs text-slate-500 leading-relaxed">
-                      {act.description}
-                    </p>
+                    <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
+                      <span className="text-[11px] font-medium text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-100">
+                        Session Ready
+                      </span>
+                      <Button
+                        variant="default"
+                        size="sm"
+                        disabled={Boolean(startingActivitySlug)}
+                        onClick={() => handleStartActivity(activity.slug)}
+                        className="text-xs bg-rose-500 hover:bg-rose-600 text-white gap-2"
+                      >
+                        {isStarting ? (
+                          <>
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            <span>Mulai...</span>
+                          </>
+                        ) : (
+                          <span>Mulai Sesi</span>
+                        )}
+                      </Button>
+                    </div>
                   </div>
-
-                  <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
-                    <span className="text-[11px] font-medium text-slate-400 bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-100">
-                      Phase Berikutnya
-                    </span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      disabled
-                      className="text-xs text-slate-400"
-                    >
-                      Segera Hadir
-                    </Button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="rounded-3xl border border-dashed border-pink-200 bg-white/80 p-8 text-center shadow-soft">
+              <Sparkles className="w-8 h-8 text-rose-400 mx-auto mb-3" />
+              <h3 className="text-sm font-bold text-slate-900">Belum ada aktivitas aktif</h3>
+              <p className="text-xs text-slate-500 mt-1">
+                Jalankan migration seed aktivitas untuk mengisi katalog Pairly.
+              </p>
+            </div>
+          )}
         </section>
       </main>
 

@@ -22,3 +22,12 @@ export type MemoryRow = Tables<"memories">;
 export type MemoryMediaRow = Tables<"memory_media">;
 export type NotificationRow = Tables<"notifications">;
 export type ReportRow = Tables<"reports">;
+
+export type ActivityCategory = "game" | "quiz" | "canvas" | "moment" | "watch";
+export type ActivityStatus =
+  | "waiting"
+  | "in_progress"
+  | "completed"
+  | "abandoned"
+  | "cancelled";
+export type ActivityEventType = string;
