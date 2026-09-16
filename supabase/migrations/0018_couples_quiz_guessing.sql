@@ -1,4 +1,4 @@
-﻿-- ==============================================================================
+-- ==============================================================================
 -- 💗 PAIRLY DATABASE MIGRATION: 0018_couples_quiz_guessing.sql
 -- Purpose: Two-phase Couples Quiz answers and authoritative reciprocal scoring.
 -- ==============================================================================
@@ -18,7 +18,7 @@ BEGIN
 
   v_state := COALESCE(v_session.state, '{}'::jsonb) || jsonb_build_object(
     'started_by', v_user_id,
-    'started_at', COALESCE(v_session.state->>'started_at', timezone('utc'::text, now())),
+    'started_at', COALESCE(v_session.state->>'started_at', (timezone('utc'::text, now()))::text),
     'answers', jsonb_build_object(
       'original', COALESCE(v_session.state->'answers'->'original', '{}'::jsonb),
       'guess', COALESCE(v_session.state->'answers'->'guess', '{}'::jsonb)
