@@ -1,4 +1,4 @@
-﻿import type { ActivitySessionRow } from "@pairly/database";
+import type { ActivitySessionRow } from "@pairly/database";
 
 export type CouplesQuizQuestion = {
   id: string;
@@ -6,15 +6,21 @@ export type CouplesQuizQuestion = {
   hint: string;
 };
 
+export type CouplesQuizPhase = "original" | "guess";
+export type CouplesQuizAnswersByUser = Record<string, Record<string, string>>;
+
 export type CouplesQuizState = {
   started_by?: string;
   started_at?: string;
-  question_index?: number;
-  answers?: Record<string, Record<string, string>>;
+  answers?: {
+    original?: CouplesQuizAnswersByUser;
+    guess?: CouplesQuizAnswersByUser;
+  };
   result?: {
     score: number;
     matches: number;
     total: number;
+    rounds?: Record<string, { matches: number; total: number }>;
     finished_by: string;
     finished_at: string;
   };
@@ -27,27 +33,27 @@ export type CouplesQuizSession = ActivitySessionRow & {
 export const COUPLES_QUIZ_QUESTIONS: CouplesQuizQuestion[] = [
   {
     id: "comfort-food",
-    prompt: "Makanan apa yang paling bikin pasanganmu merasa disayang?",
-    hint: "Jawab singkat. Contoh: ramen pedas, es krim stroberi.",
+    prompt: "Makanan apa yang paling bikin kamu merasa disayang?",
+    hint: "Isi jawaban aslimu dulu. Nanti pasanganmu akan menebak.",
   },
   {
     id: "perfect-date",
-    prompt: "Date sederhana seperti apa yang paling pasanganmu suka?",
+    prompt: "Date sederhana seperti apa yang paling kamu suka?",
     hint: "Pikirkan vibe, bukan harga.",
   },
   {
     id: "love-language",
-    prompt: "Love language pasanganmu paling terasa lewat apa?",
-    hint: "Quality time, words, touch, help, gifts — atau versi kalian sendiri.",
+    prompt: "Love language apa yang paling terasa buat kamu?",
+    hint: "Quality time, words, touch, help, gifts — atau versi kamu sendiri.",
   },
   {
     id: "stress-reset",
-    prompt: "Kalau pasanganmu stres, hal kecil apa yang paling membantu?",
-    hint: "Jawaban paling jujur biasanya menang.",
+    prompt: "Kalau kamu stres, hal kecil apa yang paling membantu?",
+    hint: "Jawaban paling jujur biasanya paling mudah ditebak.",
   },
   {
     id: "sweet-memory",
-    prompt: "Momen kecil apa yang menurut pasanganmu paling manis dari kalian?",
+    prompt: "Momen kecil apa yang paling manis dari kalian buat kamu?",
     hint: "Boleh spesifik, boleh satu kalimat.",
   },
 ];

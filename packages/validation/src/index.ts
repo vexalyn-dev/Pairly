@@ -145,12 +145,15 @@ export const couplesQuizSessionSchema = z.object({
   sessionId: z.string().uuid("Sesi Couples Quiz tidak valid"),
 });
 
+export const couplesQuizAnswerPhaseSchema = z.enum(["original", "guess"]);
+
 export const submitCouplesQuizAnswerSchema = couplesQuizSessionSchema.extend({
   questionId: z
     .string()
     .trim()
     .min(2, "Pertanyaan tidak valid")
     .max(80, "Pertanyaan tidak valid"),
+  phase: couplesQuizAnswerPhaseSchema,
   answer: z
     .string()
     .trim()

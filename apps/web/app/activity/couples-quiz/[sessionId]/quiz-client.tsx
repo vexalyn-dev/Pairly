@@ -2,7 +2,16 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ArrowLeft, Check, Heart, Loader2, Radio, Sparkles, Trophy } from "lucide-react";
+import {
+  ArrowLeft,
+  Check,
+  Heart,
+  Loader2,
+  Lock,
+  Radio,
+  Sparkles,
+  Trophy,
+} from "lucide-react";
 import { Button } from "@pairly/ui";
 import { createClient } from "@/lib/supabase/client";
 import {
@@ -12,6 +21,7 @@ import {
 } from "@/lib/quiz/actions";
 import {
   COUPLES_QUIZ_QUESTIONS,
+  type CouplesQuizPhase,
   type CouplesQuizSession,
   type CouplesQuizState,
 } from "@/lib/quiz/shared";
@@ -22,31 +32,73 @@ interface CouplesQuizClientProps {
   initialState: CouplesQuizState;
 }
 
+const phaseCopy: Record<
+  CouplesQuizPhase,
+  { badge: string; title: string; placeholder: string }
+> = {
+  original: {
+    badge: "Jawaban Asli",
+    title: "Jawab buat dirimu sendiri dulu",
+    placeholder: "Tulis jawaban aslimu...",
+  },
+  guess: {
+    badge: "Tebakan",
+    title: "Menurutmu, apa jawaban pasanganmu?",
+    placeholder: "Tulis tebakanmu tentang pasangan...",
+  },
+};
+
+function normalize(value: string) {
+  return value.trim().toLowerCase();
+}
+
 export function CouplesQuizClient({
   currentUserId,
   session,
   initialState,
 }: CouplesQuizClientProps) {
   const [state, setState] = React.useState<CouplesQuizState>(initialState);
-  const [questionIndex, setQuestionIndex] = React.useState(() =>
-    Math.min(initialState.question_index || 0, COUPLES_QUIZ_QUESTIONS.length - 1)
-  );
+  const [questionIndex, setQuestionIndex] = React.useState(0);
+  const [phase, setPhase] = React.useState<CouplesQuizPhase>("original");
   const [answer, setAnswer] = React.useState("");
   const [pending, setPending] = React.useState<string | null>(null);
   const [error, setError] = React.useState<string | null>(null);
   const [presenceCount, setPresenceCount] = React.useState(1);
 
   const question = COUPLES_QUIZ_QUESTIONS[questionIndex];
-  const myAnswers = state.answers?.[currentUserId] || {};
-  const savedAnswer = myAnswers[question.id] || "";
+  const originalAnswers = state.answers?.original || {};
+  const guessAnswers = state.answers?.guess || {};
+  const myOriginal = originalAnswers[currentUserId] || {};
+  const myGuess = guessAnswers[currentUserId] || {};
+  const savedAnswer =
+    phase === "original" ? myOriginal[question.id] || "" : myGuess[question.id] || "";
   const answered = Boolean(savedAnswer);
-  const answeredCount = Object.keys(myAnswers).length;
+  const partnerOriginalReady = Object.entries(originalAnswers).some(
+    ([userId, answers]) => userId !== currentUserId && Boolean(answers[question.id])
+  );
+  const canGuess = Boolean(myOriginal[question.id]) && partnerOriginalReady;
   const isCompleted = Boolean(state.result) || session.status === "completed";
-  const progress = Math.round((answeredCount / COUPLES_QUIZ_QUESTIONS.length) * 100);
+  const myDoneCount = COUPLES_QUIZ_QUESTIONS.reduce((total, item) => {
+    return total + (myOriginal[item.id] ? 1 : 0) + (myGuess[item.id] ? 1 : 0);
+  }, 0);
+  const progress = Math.round((myDoneCount / (COUPLES_QUIZ_QUESTIONS.length * 2)) * 100);
+  const players = Array.from(
+    new Set([...Object.keys(originalAnswers), ...Object.keys(guessAnswers)])
+  );
+  const canFinish =
+    players.length >= 2 &&
+    COUPLES_QUIZ_QUESTIONS.every((item) =>
+      players
+        .slice(0, 2)
+        .every(
+          (userId) =>
+            originalAnswers[userId]?.[item.id] && guessAnswers[userId]?.[item.id]
+        )
+    );
 
   React.useEffect(() => {
     setAnswer(savedAnswer);
-  }, [savedAnswer, question.id]);
+  }, [savedAnswer, question.id, phase]);
 
   React.useEffect(() => {
     const supabase = createClient();
@@ -95,34 +147,45 @@ export function CouplesQuizClient({
     if (!result.success) setError(result.error || "Aksi gagal.");
     if (result.state) setState(result.state);
     setPending(null);
+    return result;
   }
 
   async function handleSubmitAnswer() {
-    await run("answer", async () => {
-      const result = await submitCouplesQuizAnswerAction({
+    const result = await run("answer", () =>
+      submitCouplesQuizAnswerAction({
         sessionId: session.id,
         questionId: question.id,
+        phase,
         answer,
-      });
+      })
+    );
 
-      if (result.success) {
-        setQuestionIndex((current) =>
-          Math.min(current + 1, COUPLES_QUIZ_QUESTIONS.length - 1)
-        );
-      }
-
-      return result;
-    });
+    if (!result.success) return;
+    if (phase === "original") {
+      setPhase("guess");
+      return;
+    }
+    setQuestionIndex((current) =>
+      Math.min(current + 1, COUPLES_QUIZ_QUESTIONS.length - 1)
+    );
+    setPhase("original");
   }
 
   function nextQuestion() {
     setQuestionIndex((current) =>
       Math.min(current + 1, COUPLES_QUIZ_QUESTIONS.length - 1)
     );
+    setPhase("original");
   }
 
   function previousQuestion() {
     setQuestionIndex((current) => Math.max(current - 1, 0));
+    setPhase("original");
+  }
+
+  function selectQuestion(index: number) {
+    setQuestionIndex(index);
+    setPhase("original");
   }
 
   return (
@@ -155,7 +218,8 @@ export function CouplesQuizClient({
                   Seberapa kenal kalian?
                 </h1>
                 <p className="mt-3 max-w-xl text-sm leading-6 text-slate-500">
-                  Jawab dari hati. Pairly cocokkan jawaban yang sama secara realtime.
+                  Jawab diri sendiri dulu, lalu tebak pasangan. Skor dihitung dari tebakan
+                  yang cocok.
                 </p>
               </div>
               <div className="hidden h-16 w-16 items-center justify-center rounded-3xl bg-gradient-to-tr from-rose-500 to-fuchsia-500 text-white shadow-romantic sm:flex">
@@ -184,9 +248,21 @@ export function CouplesQuizClient({
                 </p>
                 <p className="mt-2 text-6xl font-black">{state.result.score}%</p>
                 <p className="mt-3 text-sm text-white/85">
-                  {state.result.matches} dari {state.result.total} jawaban sama. Simpan
-                  momen ini, ulang lagi nanti.
+                  {state.result.matches} dari {state.result.total} tebakan cocok.
                 </p>
+                <div className="mt-6 space-y-3">
+                  {COUPLES_QUIZ_QUESTIONS.map((item) => {
+                    const round = state.result?.rounds?.[item.id];
+                    return (
+                      <div key={item.id} className="rounded-2xl bg-white/15 p-4 text-sm">
+                        <p className="font-black">{item.prompt}</p>
+                        <p className="mt-1 text-white/80">
+                          {round?.matches ?? 0}/{round?.total ?? 2} tebakan cocok.
+                        </p>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             ) : (
               <div>
@@ -198,33 +274,50 @@ export function CouplesQuizClient({
                 </div>
 
                 <div className="rounded-3xl border border-rose-100 bg-gradient-to-br from-white to-rose-50/70 p-6">
-                  <p className="text-xs font-black uppercase tracking-[0.22em] text-rose-400">
-                    Pertanyaan {questionIndex + 1}/{COUPLES_QUIZ_QUESTIONS.length}
-                  </p>
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <p className="text-xs font-black uppercase tracking-[0.22em] text-rose-400">
+                      Pertanyaan {questionIndex + 1}/{COUPLES_QUIZ_QUESTIONS.length}
+                    </p>
+                    <p className="rounded-full bg-slate-950 px-3 py-1 text-xs font-black text-white">
+                      {phaseCopy[phase].badge}
+                    </p>
+                  </div>
                   <h2 className="mt-3 text-2xl font-black text-slate-950">
                     {question.prompt}
                   </h2>
-                  <p className="mt-2 text-sm text-slate-500">{question.hint}</p>
+                  <p className="mt-2 text-sm font-bold text-slate-600">
+                    {phaseCopy[phase].title}
+                  </p>
+                  <p className="mt-1 text-sm text-slate-500">
+                    {phase === "guess" && !canGuess
+                      ? "Tunggu sampai kamu dan pasangan sama-sama mengisi jawaban asli."
+                      : question.hint}
+                  </p>
 
                   <textarea
                     value={answer}
                     onChange={(event) => setAnswer(event.target.value)}
                     maxLength={500}
                     rows={4}
-                    className="mt-5 w-full resize-none rounded-2xl border border-pink-100 bg-white/90 p-4 text-sm font-medium outline-none ring-rose-200 transition focus:ring-4"
-                    placeholder="Tulis jawabanmu..."
+                    disabled={phase === "guess" && !canGuess}
+                    className="mt-5 w-full resize-none rounded-2xl border border-pink-100 bg-white/90 p-4 text-sm font-medium outline-none ring-rose-200 transition focus:ring-4 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
+                    placeholder={phaseCopy[phase].placeholder}
                   />
 
                   <div className="mt-5 flex flex-wrap items-center gap-3">
                     <Button
                       onClick={handleSubmitAnswer}
-                      disabled={Boolean(pending) || answer.trim().length === 0}
+                      disabled={
+                        Boolean(pending) ||
+                        answer.trim().length === 0 ||
+                        (phase === "guess" && !canGuess)
+                      }
                       className="rounded-2xl bg-rose-500 px-5 font-bold text-white hover:bg-rose-600"
                     >
                       {pending === "answer" ? (
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       ) : null}
-                      {answered ? "Update Jawaban" : "Kirim Jawaban"}
+                      {answered ? "Update" : "Kirim"} {phaseCopy[phase].badge}
                     </Button>
                     <Button
                       variant="outline"
@@ -258,12 +351,13 @@ export function CouplesQuizClient({
             </p>
             <div className="mt-6 space-y-3">
               {COUPLES_QUIZ_QUESTIONS.map((item, index) => {
-                const done = Boolean(myAnswers[item.id]);
+                const originalDone = Boolean(myOriginal[item.id]);
+                const guessDone = Boolean(myGuess[item.id]);
                 return (
                   <button
                     key={item.id}
                     type="button"
-                    onClick={() => setQuestionIndex(index)}
+                    onClick={() => selectQuestion(index)}
                     className={`flex w-full items-center justify-between rounded-2xl border px-4 py-3 text-left text-sm transition ${
                       index === questionIndex
                         ? "border-rose-300 bg-white/15"
@@ -273,19 +367,26 @@ export function CouplesQuizClient({
                     <span className="font-bold">
                       {index + 1}. {item.prompt}
                     </span>
-                    {done ? <Check className="h-4 w-4 text-emerald-300" /> : null}
+                    <span className="flex gap-1">
+                      {originalDone ? (
+                        <Check className="h-4 w-4 text-emerald-300" />
+                      ) : (
+                        <Lock className="h-4 w-4 text-white/30" />
+                      )}
+                      {guessDone ? <Check className="h-4 w-4 text-fuchsia-300" /> : null}
+                    </span>
                   </button>
                 );
               })}
             </div>
 
-            {!isCompleted && answeredCount === COUPLES_QUIZ_QUESTIONS.length && (
+            {!isCompleted && (
               <Button
                 onClick={() =>
                   run("finish", () => finishCouplesQuizAction({ sessionId: session.id }))
                 }
-                disabled={Boolean(pending)}
-                className="mt-6 w-full rounded-2xl bg-white text-slate-950 hover:bg-rose-50"
+                disabled={Boolean(pending) || !canFinish}
+                className="mt-6 w-full rounded-2xl bg-white text-slate-950 hover:bg-rose-50 disabled:opacity-50"
               >
                 {pending === "finish" ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -298,4 +399,8 @@ export function CouplesQuizClient({
       </section>
     </main>
   );
+}
+
+if (process.env.NODE_ENV === "test") {
+  console.assert(normalize(" Ramen Pedas ") === "ramen pedas");
 }

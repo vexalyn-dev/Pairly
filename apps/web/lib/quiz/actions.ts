@@ -97,11 +97,12 @@ export async function submitCouplesQuizAnswerAction(
   const { supabase, user } = await requireUser();
   if (!user) return { success: false, error: "Kamu harus masuk terlebih dahulu." };
 
-  const { sessionId, questionId, answer } = validation.data;
+  const { sessionId, questionId, phase, answer } = validation.data;
   const { data, error } = await (supabase.rpc as any)("submit_couples_quiz_answer", {
     p_session_id: sessionId,
     p_question_id: questionId,
     p_answer: answer,
+    p_phase: phase,
   });
 
   if (error || !data) return { success: false, error: "Gagal mengirim jawaban." };
