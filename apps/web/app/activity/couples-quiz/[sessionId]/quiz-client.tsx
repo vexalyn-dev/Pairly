@@ -28,15 +28,14 @@ export function CouplesQuizClient({
   initialState,
 }: CouplesQuizClientProps) {
   const [state, setState] = React.useState<CouplesQuizState>(initialState);
+  const [questionIndex, setQuestionIndex] = React.useState(() =>
+    Math.min(initialState.question_index || 0, COUPLES_QUIZ_QUESTIONS.length - 1)
+  );
   const [answer, setAnswer] = React.useState("");
   const [pending, setPending] = React.useState<string | null>(null);
   const [error, setError] = React.useState<string | null>(null);
   const [presenceCount, setPresenceCount] = React.useState(1);
 
-  const questionIndex = Math.min(
-    state.question_index || 0,
-    COUPLES_QUIZ_QUESTIONS.length - 1
-  );
   const question = COUPLES_QUIZ_QUESTIONS[questionIndex];
   const myAnswers = state.answers?.[currentUserId] || {};
   const savedAnswer = myAnswers[question.id] || "";
@@ -98,18 +97,32 @@ export function CouplesQuizClient({
     setPending(null);
   }
 
+  async function handleSubmitAnswer() {
+    await run("answer", async () => {
+      const result = await submitCouplesQuizAnswerAction({
+        sessionId: session.id,
+        questionId: question.id,
+        answer,
+      });
+
+      if (result.success) {
+        setQuestionIndex((current) =>
+          Math.min(current + 1, COUPLES_QUIZ_QUESTIONS.length - 1)
+        );
+      }
+
+      return result;
+    });
+  }
+
   function nextQuestion() {
-    setState((current) => ({
-      ...current,
-      question_index: Math.min(questionIndex + 1, COUPLES_QUIZ_QUESTIONS.length - 1),
-    }));
+    setQuestionIndex((current) =>
+      Math.min(current + 1, COUPLES_QUIZ_QUESTIONS.length - 1)
+    );
   }
 
   function previousQuestion() {
-    setState((current) => ({
-      ...current,
-      question_index: Math.max(questionIndex - 1, 0),
-    }));
+    setQuestionIndex((current) => Math.max(current - 1, 0));
   }
 
   return (
@@ -204,15 +217,7 @@ export function CouplesQuizClient({
 
                   <div className="mt-5 flex flex-wrap items-center gap-3">
                     <Button
-                      onClick={() =>
-                        run("answer", () =>
-                          submitCouplesQuizAnswerAction({
-                            sessionId: session.id,
-                            questionId: question.id,
-                            answer,
-                          })
-                        )
-                      }
+                      onClick={handleSubmitAnswer}
                       disabled={Boolean(pending) || answer.trim().length === 0}
                       className="rounded-2xl bg-rose-500 px-5 font-bold text-white hover:bg-rose-600"
                     >
@@ -258,9 +263,7 @@ export function CouplesQuizClient({
                   <button
                     key={item.id}
                     type="button"
-                    onClick={() =>
-                      setState((current) => ({ ...current, question_index: index }))
-                    }
+                    onClick={() => setQuestionIndex(index)}
                     className={`flex w-full items-center justify-between rounded-2xl border px-4 py-3 text-left text-sm transition ${
                       index === questionIndex
                         ? "border-rose-300 bg-white/15"
