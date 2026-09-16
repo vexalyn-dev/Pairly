@@ -39,14 +39,15 @@ export function CouplesQuizClient({
   );
   const question = COUPLES_QUIZ_QUESTIONS[questionIndex];
   const myAnswers = state.answers?.[currentUserId] || {};
-  const answered = Boolean(myAnswers[question.id]);
+  const savedAnswer = myAnswers[question.id] || "";
+  const answered = Boolean(savedAnswer);
   const answeredCount = Object.keys(myAnswers).length;
   const isCompleted = Boolean(state.result) || session.status === "completed";
   const progress = Math.round((answeredCount / COUPLES_QUIZ_QUESTIONS.length) * 100);
 
   React.useEffect(() => {
-    setAnswer(myAnswers[question.id] || "");
-  }, [myAnswers, question.id]);
+    setAnswer(savedAnswer);
+  }, [savedAnswer, question.id]);
 
   React.useEffect(() => {
     const supabase = createClient();
